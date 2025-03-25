@@ -1,5 +1,6 @@
 package dev.cavefish.minipost.services;
 
+import dev.cavefish.minipost.domain.users.EmailValidator;
 import dev.cavefish.minipost.domain.users.PasswordEncryptor;
 import dev.cavefish.minipost.domain.users.User;
 import dev.cavefish.minipost.domain.users.UserCreateRequest;
@@ -13,6 +14,7 @@ import java.util.List;
 public class UsersService {
 
     private final PasswordEncryptor passwordEncryptor;
+    private final EmailValidator emailValidator;
 
     public List<User> getUsers() {
         // TODO Add query to DB to retrieve all users

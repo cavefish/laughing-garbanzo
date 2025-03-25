@@ -4,9 +4,11 @@ import dev.cavefish.minipost.domain.tags.Tag;
 import dev.cavefish.minipost.domain.tags.TagCreateRequest;
 import dev.cavefish.minipost.domain.tags.TagNameNormalizer;
 import dev.cavefish.minipost.entities.TagEntity;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@AllArgsConstructor
 public class TagEntityMapper {
     private TagNameNormalizer normalizer;
 
