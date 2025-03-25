@@ -16,6 +16,7 @@ public class PostsMapper {
 
     public PostDto toDto(Post post) {
         return PostDto.builder()
+                .id(post.id().toString())
                 .createdBy(usersMapper.toDto(post.createdBy()))
                 .title(post.title())
                 .content(post.content())

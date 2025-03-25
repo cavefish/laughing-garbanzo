@@ -15,6 +15,7 @@ import org.springframework.web.servlet.ModelAndView;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @Controller
 @RequestMapping("/posts")
@@ -53,8 +54,8 @@ public class PostsController {
     }
 
     @GetMapping("/{id}/delete")
-    public ModelAndView delete(@PathVariable("id") int id) {
-        boolean success = postsService.deletePost(id);
+    public ModelAndView delete(@PathVariable("id") String id) {
+        boolean success = postsService.deletePost(UUID.fromString(id));
         return success ? new ModelAndView("redirect:/posts") : error("Cannot delete post %d".formatted(id));
     }
 
