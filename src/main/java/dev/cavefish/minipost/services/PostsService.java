@@ -5,39 +5,47 @@ import dev.cavefish.minipost.domain.posts.PostCreateRequest;
 import dev.cavefish.minipost.domain.tags.Tag;
 import dev.cavefish.minipost.domain.users.User;
 import dev.cavefish.minipost.entities.PostEntity;
+import dev.cavefish.minipost.entities.TagEntity;
+import dev.cavefish.minipost.entities.mappers.TagEntityMapper;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Service
+@AllArgsConstructor
 public class PostsService {
 
     @PersistenceContext
     private EntityManager em;
 
+    private TagEntityMapper tagEntityMapper;
+
+    private TagsService tagsService;
+
+    @Transactional
     public List<Post> searchPosts(String createdBy, String tags, LocalDateTime fromDate, LocalDateTime toDate) {
         List<PostEntity> dbPosts = em.createQuery("select post from PostEntity post", PostEntity.class).getResultList();
         ArrayList<Post> posts = new ArrayList<>();
 
         for (PostEntity dbPost : dbPosts) {
+            User user = new User("user-alias", "user-email", "user-firstname", "user-lastname");
+            List<Tag> mappedTags = new ArrayList<>();
+            for (TagEntity tagEntity : dbPost.getRelatedTags()) {
+                mappedTags.add(tagEntityMapper.fromEntity(tagEntity));
+            }
             Post post = new Post(
                     dbPost.getId(),
-                    new User("user-alias", "user-email", "user-firstname", "user-lastname"),
+                    user, // TODO replace with a new column representing a many-to-many relationship
                     dbPost.getTitle(),
                     dbPost.getContent(),
                     dbPost.getCreatedAt(),
-                    List.of(
-                            new Tag(1, "tag-1"),
-                            new Tag(2, "tag-2"),
-                            new Tag(3, "tag-3")
-                    )
+                    mappedTags
             );
             posts.add(post);
         }
@@ -47,17 +55,22 @@ public class PostsService {
 
     @Transactional
     public boolean create(PostCreateRequest postCreateRequest) {
-        try {
-            PostEntity postToCreate = PostEntity.builder()
-                    .id(UUID.randomUUID())
-                    .title(postCreateRequest.title())
-                    .content(postCreateRequest.content())
-                    .createdAt(LocalDateTime.now())
-                    .build();
-            em.persist(postToCreate);
-        } catch (EntityExistsException e) {
-            return false;
+        String[] tagNames = postCreateRequest.tags().split(" ");
+        Set<TagEntity> tags = new HashSet<>();
+        for (String tagName : tagNames) {
+            TagEntity tagEntity = tagsService.upsertTagEntity(tagName);
+            if (tagEntity != null) {
+                tags.add(tagEntity);
+            }
         }
+        PostEntity postToCreate = PostEntity.builder()
+                .title(postCreateRequest.title())
+                .content(postCreateRequest.content())
+                .createdAt(LocalDateTime.now())
+                .build();
+        PostEntity createdPost = em.merge(postToCreate);
+        createdPost.getRelatedTags().addAll(tags);
+        em.merge(createdPost);
         return true;
     }
 

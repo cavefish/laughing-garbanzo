@@ -6,6 +6,10 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+
 @Entity
 @Data
 @Builder
@@ -15,8 +19,15 @@ import lombok.NoArgsConstructor;
 public class TagEntity {
     @Id
     @GeneratedValue
-    private int id;
+    private Integer id;
 
     @Column(nullable = false, unique = true)
     private String name;
+
+    @ManyToMany(cascade = {
+            CascadeType.REFRESH,
+            CascadeType.PERSIST,
+            CascadeType.MERGE
+    }, mappedBy = "relatedTags", fetch = FetchType.LAZY)
+    private Collection<PostEntity> relatedPosts = new HashSet<>();
 }

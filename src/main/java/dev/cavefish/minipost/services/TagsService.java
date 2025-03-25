@@ -2,6 +2,8 @@ package dev.cavefish.minipost.services;
 
 import dev.cavefish.minipost.domain.tags.Tag;
 import dev.cavefish.minipost.domain.tags.TagCreateRequest;
+import dev.cavefish.minipost.domain.tags.TagNameNormalizer;
+import dev.cavefish.minipost.entities.PostEntity;
 import dev.cavefish.minipost.entities.TagEntity;
 import dev.cavefish.minipost.entities.mappers.TagEntityMapper;
 import jakarta.persistence.EntityManager;
@@ -23,6 +25,8 @@ public class TagsService {
 
     private TagEntityMapper tagEntityMapper;
 
+    private TagNameNormalizer tagNameNormalizer;
+
     public List<Tag> getTags() {
         return em.createQuery("select t from TagEntity t", TagEntity.class)
                 .getResultStream()
@@ -37,6 +41,10 @@ public class TagsService {
             return false;
         }
         em.remove(tagEntity);
+        // Manually propagate deletion for many2many
+        for (PostEntity relatedPost : tagEntity.getRelatedPosts()) {
+            relatedPost.getRelatedTags().remove(tagEntity);
+        }
         return true;
     }
 
@@ -45,5 +53,19 @@ public class TagsService {
         TagEntity entity = tagEntityMapper.toEntity(request);
         em.persist(entity);
         return true;
+    }
+
+    // upsert = update & insert = try to find, else create if missing
+    TagEntity upsertTagEntity(String tagName) {
+        String normalizedTagName = tagNameNormalizer.normalize(tagName);
+        if (normalizedTagName == null) return null;
+        if (normalizedTagName.isBlank()) return null;
+        List<TagEntity> results = em.createQuery("select t from TagEntity t where t.name = :name", TagEntity.class)
+                .setParameter("name", normalizedTagName)
+                .setMaxResults(1)
+                .getResultList();
+        if (!results.isEmpty()) return results.get(0);
+        TagEntity tagToCreate = TagEntity.builder().name(normalizedTagName).build();
+        return em.merge(tagToCreate);
     }
 }
