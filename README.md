@@ -14,9 +14,11 @@ aprendizaje de los siguientes conceptos:
 
 - Completar el código de la clase [TagNameNormalizer.java](src/main/java/dev/cavefish/minipost/domain/TagNameNormalizer.java),
  atendiendo a sus tests.
+- Completar el código de la clase [EmailValidator.java](src/main/java/dev/cavefish/minipost/domain/users/EmailValidator.java),
+ creando los tests necesarios.
 - Implementar la persistencia de los objetos de dominio User y Post.
   - Deberás crear una clase de entidad. Fíjate en [TagEntity.java](src/main/java/dev/cavefish/minipost/entities/TagEntity.java).
   - Crea un mapper para mantener la división de los módulos del sistema. Fíjate en [TagEntityMapper.java](src/main/java/dev/cavefish/minipost/entities/mappers/TagEntityMapper.java). 
-  - Crea una relación entre Post (N) y User (1), y Post (N) y Tags (N).
+  - Crea una relación entre Post (N) y User (1).
 
 ## 

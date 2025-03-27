@@ -7,9 +7,9 @@ import dev.cavefish.minipost.domain.users.User;
 import dev.cavefish.minipost.entities.PostEntity;
 import dev.cavefish.minipost.entities.TagEntity;
 import dev.cavefish.minipost.entities.mappers.TagEntityMapper;
-import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.TypedQuery;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -30,7 +30,7 @@ public class PostsService {
 
     @Transactional
     public List<Post> searchPosts(String createdBy, String tags, LocalDateTime fromDate, LocalDateTime toDate) {
-        List<PostEntity> dbPosts = em.createQuery("select post from PostEntity post", PostEntity.class).getResultList();
+        List<PostEntity> dbPosts = searchPostEntities(createdBy, tags, fromDate, toDate);
         ArrayList<Post> posts = new ArrayList<>();
 
         for (PostEntity dbPost : dbPosts) {
@@ -51,6 +51,50 @@ public class PostsService {
         }
 
         return posts;
+    }
+
+    private List<PostEntity> searchPostEntities(String createdBy, String tags, LocalDateTime fromDate, LocalDateTime toDate) {
+        if (createdBy == null && tags == null && fromDate == null && toDate == null) {
+            return em.createQuery("select post from PostEntity post", PostEntity.class).getResultList();
+        }
+        // TODO implement the rest of query parameters
+        List<Object[]> queryParameters = new ArrayList<>();
+        if (createdBy != null) {
+            // TODO implement
+        }
+        if (tags != null) {
+            queryParameters.add(new Object[] {"tag.name in :tagvalues", "tagvalues", Arrays.stream(tags.split(" ")).toList()});
+        }
+        if (fromDate != null) {
+            queryParameters.add(new Object[]{"post.createdAt >= :fromdate", "fromdate", fromDate});
+        }
+        if (toDate != null) {
+            // TODO implement
+        }
+        StringBuilder baseQuery = getQuery(queryParameters);
+        TypedQuery<PostEntity> query = em.createQuery(baseQuery.toString(), PostEntity.class);
+        for (Object[] queryParameter : queryParameters) {
+            String paramName = (String) queryParameter[1];
+            Object paramValue = queryParameter[2];
+            query.setParameter(paramName, paramValue);
+        }
+        return query.getResultList();
+    }
+
+    private static StringBuilder getQuery(List<Object[]> queryParameters) {
+        StringBuilder baseQuery = new StringBuilder("select post from PostEntity post join post.relatedTags tag");
+        int addedParameters = 0;
+        for (Object[] queryParameter : queryParameters) {
+            String queryPart = (String) queryParameter[0];
+            if (addedParameters == 0) {
+                baseQuery.append(" WHERE ");
+            } else {
+                baseQuery.append(" AND ");
+            }
+            baseQuery.append(queryPart);
+            addedParameters++;
+        }
+        return baseQuery;
     }
 
     @Transactional
