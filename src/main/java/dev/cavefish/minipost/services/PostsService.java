@@ -41,7 +41,7 @@ public class PostsService {
             }
             Post post = new Post(
                     dbPost.getId(),
-                    user, // TODO replace with a new column representing a many-to-many relationship
+                    user, // TODO replace with a new column representing a many-to-one relationship
                     dbPost.getTitle(),
                     dbPost.getContent(),
                     dbPost.getCreatedAt(),

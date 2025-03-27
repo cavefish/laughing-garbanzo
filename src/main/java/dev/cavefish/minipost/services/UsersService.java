@@ -4,6 +4,8 @@ import dev.cavefish.minipost.domain.users.EmailValidator;
 import dev.cavefish.minipost.domain.users.PasswordEncryptor;
 import dev.cavefish.minipost.domain.users.User;
 import dev.cavefish.minipost.domain.users.UserCreateRequest;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +14,8 @@ import java.util.List;
 @Service
 @AllArgsConstructor
 public class UsersService {
+    @PersistenceContext
+    private EntityManager em;
 
     private final PasswordEncryptor passwordEncryptor;
     private final EmailValidator emailValidator;
