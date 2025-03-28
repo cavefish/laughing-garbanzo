@@ -1,0 +1,84 @@
+@startuml
+'!theme sketchy-outline
+
+package controllers {
+    class PostController {
+       get():WebResponse
+    }
+}
+
+package service {
+    class PostService {
+        get():List<PostDto>
+    }
+    class PostMapper {
+        map(entity:PostEntity):Post
+    }
+}
+
+package dto {
+    class PostDto {
+        title:String
+        content:String
+        createdBy:UserDto
+    }
+    class UserDto {
+        alias:String
+    }
+    UserDto *-- PostDto
+}
+
+package repositories <<database>> {
+    interface PostRepository
+
+    package entities {
+        class PostEntity
+        class UserEntity
+        UserEntity *-- PostEntity
+    }
+
+    package jpa {
+        class JpaPostRepository
+
+        PostRepository <|-- JpaPostRepository
+    }
+
+    package inmemory {
+        class InMemoryPostRepository {
+            values:List<PostEntity>
+        }
+
+        PostRepository <|-- InMemoryPostRepository
+    }
+}
+
+package domain {
+    class Post {
+        title:String
+        content:String
+        createdBy:User
+    }
+
+    class User {
+        alias:String
+    }
+
+    User *-- Post
+}
+
+
+
+
+PostService --> PostRepository
+PostController --> PostService
+PostService --> PostMapper
+PostMapper --> Post
+PostMapper --> PostEntity
+PostService --> Post
+PostService --> PostEntity
+PostService --> PostDto
+PostRepository *-- PostEntity
+PostController --> PostDto
+
+
+@enduml

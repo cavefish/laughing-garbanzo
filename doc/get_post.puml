@@ -1,0 +1,18 @@
+@startuml
+'!theme bluegray
+'autonumber
+'autoactivate on
+
+actor Bob
+
+Bob -> PostController : get /posts
+PostController -> PostsService : getAll()
+PostsService -> PostRepository : findAll()
+return list of PostEntity
+PostsService -> PostMapper : map
+return mapped value
+return list of Post
+PostController -> PostController : map
+return
+return Web with posts
+@enduml
