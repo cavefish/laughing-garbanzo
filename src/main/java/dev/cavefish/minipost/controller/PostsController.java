@@ -1,11 +1,9 @@
 package dev.cavefish.minipost.controller;
 
 import dev.cavefish.minipost.controller.mappers.PostsMapper;
-import dev.cavefish.minipost.controller.mappers.TagsMapper;
 import dev.cavefish.minipost.controller.mappers.UsersMapper;
 import dev.cavefish.minipost.dto.*;
 import dev.cavefish.minipost.services.PostsService;
-import dev.cavefish.minipost.services.TagsService;
 import dev.cavefish.minipost.services.UsersService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Controller;
